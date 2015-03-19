@@ -63,7 +63,7 @@ public class SqlCommand {
 			Class.forName("com.mysql.jdbc.Driver");
 			con = DriverManager.getConnection(url, user, password);
 			String uid = "123";
-			pst = con.prepareStatement("SELECT * FROM " + table + " WHERE " + table + ".userid != " + userid);
+			pst = con.prepareStatement("SELECT * FROM " + table + " WHERE userid !='" + userid + "'");
 			rs = pst.executeQuery();
 			
 			while (rs.next()) {
@@ -92,4 +92,77 @@ public class SqlCommand {
 		}
 		return result;
 	}
+	
+	// Returns a list of game requests that are not requested by the given userid
+		public static void removeGameRequest(String game, String userid) {
+			Connection con = null;
+			PreparedStatement pst = null;
+			int rs;
+
+			String table = game.toLowerCase() + "_matchmaking";
+			
+			String url = "jdbc:mysql://inf122.davidlepe.com:3306/finalproj";
+			String user = "inf122";
+			String password = "password";
+			try {
+				Class.forName("com.mysql.jdbc.Driver");
+				con = DriverManager.getConnection(url, user, password);
+				pst = con.prepareStatement("DELETE FROM " + table + " WHERE userid = '" + userid + "'");
+				rs = pst.executeUpdate();
+				
+			} catch (SQLException ex) {
+				ex.printStackTrace();
+			} catch (ClassNotFoundException e) {
+				System.out.println("Could not find driver :(");
+				e.printStackTrace();
+			} finally {
+				try {
+					if (pst != null) {
+						pst.close();
+					}
+					if (con != null) {
+						con.close();
+					}
+
+				} catch (SQLException ex) {
+					ex.printStackTrace();
+				}
+			}
+		}
+		
+		public static void removeFromUserTable(String userid) {
+			Connection con = null;
+			PreparedStatement pst = null;
+			int rs;
+
+			String table = "users";
+			
+			String url = "jdbc:mysql://inf122.davidlepe.com:3306/finalproj";
+			String user = "inf122";
+			String password = "password";
+			try {
+				Class.forName("com.mysql.jdbc.Driver");
+				con = DriverManager.getConnection(url, user, password);
+				pst = con.prepareStatement("DELETE FROM " + table + " WHERE user_name = '" + userid + "';");
+				rs = pst.executeUpdate();
+				
+			} catch (SQLException ex) {
+				ex.printStackTrace();
+			} catch (ClassNotFoundException e) {
+				System.out.println("Could not find driver :(");
+				e.printStackTrace();
+			} finally {
+				try {
+					if (pst != null) {
+						pst.close();
+					}
+					if (con != null) {
+						con.close();
+					}
+
+				} catch (SQLException ex) {
+					ex.printStackTrace();
+				}
+			}
+		}
 }

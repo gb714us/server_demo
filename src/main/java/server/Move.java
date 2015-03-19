@@ -5,7 +5,12 @@ public class Move {
 	private String[][] gameState;
 	private String currentStatus;
 	private String currentTurn;
-	
+	public Move(String[][] gameState, String currentStatus, String currentTurn)
+	{
+		this.gameState = gameState;
+		this.currentStatus = currentStatus;
+		this.currentTurn = currentTurn;
+	}
 	public String[][] getGameState() {
 		return gameState;
 	}

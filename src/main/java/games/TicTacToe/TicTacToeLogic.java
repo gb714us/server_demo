@@ -70,12 +70,12 @@ public class TicTacToeLogic extends Logic
 		String result = "";
 		if (board[row][col] == "*")
 		{
-			result += "Moved placed by: " + player + " x: " + row + " y: " + col;
 			board[row][col] = player;
 		}
 		checkWin();
 		checkFull();
 		switchPlayer();
+		result = player;
 		
 		return result;
 	}

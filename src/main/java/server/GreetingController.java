@@ -1,29 +1,23 @@
 package server;
 
-import java.io.IOException;
-
-import games.AbstractClasses.*;
+import games.AbstractClasses.Game;
+import games.TicTacToe.TicTacToeGame;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
 
-import org.apache.tomcat.jni.Time;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import games.TicTacToe.*;
-
 @RestController
 public class GreetingController {
-	private HashMap<String, Game> gameList;
-	private TicTacToeGame gameInstance;
+	private HashMap<String, Game> gameList = new HashMap<String, Game>();
+	private int gameCounter = 0;
     private static final String template = "Hello, %s!";
 //    private final AtomicLong counter = new AtomicLong();
 
-    @RequestMapping("/greeting")
+    @RequestMapping("/")
     public Greeting greeting(@RequestParam(value="name", defaultValue="World") String name) {
     	
 //    	game = new TicTacToeGame();
@@ -33,20 +27,31 @@ public class GreetingController {
     }
     
     @RequestMapping("/move")
-    public Move move(@RequestParam String x, @RequestParam String y, @RequestParam String gameId) {
-//    	Game game = gameList.get(gameId);
-    	Game game = gameInstance;
+    public Move move(@RequestParam String x, @RequestParam String y, @RequestParam(value="id") String gameId) {
+    	Game game = gameList.get(gameId);
+ 
+//    	Game game = gameInstance;
     	
     	String result = game.getLogic().placePiece(Integer.parseInt(x), Integer.parseInt(y));
     	String[][] gameState = game.getLogic().getBoard();
-    	return new Move();
+    	
+    	System.out.println(result);
+    	
+    	for (int i = 0; i < gameState.length; i++)
+    	{
+    		for (int j = 0; j < gameState[i].length; j++)
+    		{
+    			System.out.println(gameState[i][j]);
+    		}
+    	}
+    	return new Move(gameState, result, "1");
     }
     
     @RequestMapping("/findgame")
 	public Matchmaking findgame(@RequestParam(value="game", defaultValue="") String game, 
 			@RequestParam(value="user", defaultValue="") String user) {
-		// TODO: make this come as a parameter
 		int userid = 123;
+		String opponentID = "";
 		String gameID = "";
 		String[][] gameState = null;
 		
@@ -57,10 +62,15 @@ public class GreetingController {
 			listOfGames = SqlCommand.retrieveListOfGameRequests(game, user);
 		}
 		System.out.println("Match found! Initiating game state");
-		gameID = listOfGames.get(0);
+		opponentID = listOfGames.get(0);
+		if (gameCounter % 2 == 0) {
+			gameCounter++;
+		}
+		gameID = String.valueOf(gameCounter);
+		System.out.println(gameCounter + " " + gameID);
 		
 		if (game.equals("TicTacToe")) {
-			gameInstance = new TicTacToeGame();
+			Game gameInstance = new TicTacToeGame();
 			gameInstance.initializeGame();
 			gameList.put(gameID, gameInstance);
 			gameState = gameInstance.getLogic().getBoard();
@@ -72,12 +82,33 @@ public class GreetingController {
 			
 			// put user into matchmaking for tictactoe
 		} else if (game.equals("Battleship")) {
+//			Game gameInstance = new TicTacToeGame();
+//			gameInstance.initializeGame();
+//			gameList.put(gameID, gameInstance);
+//			gameState = gameInstance.getLogic().getBoard();
+//			for (int row = 0; row < 3; row++) {
+//				for (int col = 0; col < 3; col++)
+//					System.out.print(gameState[row][col] + "  ");
+//				System.out.println();
+			
 			// put user into matchmaking for battleship
 		} else if (game.equals("Othello")) {
-			// put user into matchmaking for othello
+//			Game gameInstance = new TicTacToeGame();
+//			gameInstance.initializeGame();
+//			gameList.put(gameID, gameInstance);
+//			gameState = gameInstance.getLogic().getBoard();
+//			for (int row = 0; row < 3; row++) {
+//				for (int col = 0; col < 3; col++)
+//					System.out.print(gameState[row][col] + "  ");
+//				System.out.println();
 		}
+			// put user into matchmaking for othello
+		
+		SqlCommand.removeFromUserTable(user);
+		SqlCommand.removeGameRequest(game, user);
 
 
-		return new Matchmaking(gameID, gameState);
+		return new Matchmaking(gameID, opponentID, gameState);
 	}
+
 }
